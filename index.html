@@ -406,6 +406,9 @@
       margin-top: 14px; font-size: 12px; color: var(--muted-2); text-align: center; line-height: 1.5;
     }
     .auth-note a { color: var(--accent); }
+    .auth-error { display: none; margin: 10px 0 0; padding: 10px 12px; border-radius: 10px; background: rgba(255,110,110,.1); border: 1px solid rgba(255,110,110,.3); color: #ffb4b4; font-size: 13.5px; line-height: 1.4; }
+    .auth-error.show { display: block; }
+    .auth-submit[disabled] { opacity: .6; cursor: not-allowed; transform: none !important; }
 
     @media (max-width: 560px) {
       .field-row { grid-template-columns: 1fr; }
@@ -526,7 +529,9 @@
               <label for="loginPassword">Password</label>
               <input id="loginPassword" name="password" type="password" placeholder="••••••••" required autocomplete="current-password">
             </div>
-            <button type="submit" class="btn btn-primary auth-submit">Log in</button>
+            <p class="auth-note" style="margin:-6px 0 0; text-align:right;"><a href="#" id="openForgotPassword">Forgot password?</a></p>
+            <p class="auth-error" id="loginError" role="alert" aria-live="polite"></p>
+            <button type="submit" class="btn btn-primary auth-submit" id="loginSubmitBtn">Log in</button>
             <p class="auth-note">New here? <a href="#" id="switchToSignup">Create an account</a></p>
           </form>
         </div>
@@ -542,6 +547,16 @@
             <div class="field">
               <label for="signupEmail">Email</label>
               <input id="signupEmail" name="email" type="email" placeholder="you@example.com" required autocomplete="email">
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="signupPassword">Password</label>
+                <input id="signupPassword" name="password" type="password" placeholder="At least 8 characters" required minlength="8" autocomplete="new-password">
+              </div>
+              <div class="field">
+                <label for="signupConfirmPassword">Confirm password</label>
+                <input id="signupConfirmPassword" name="confirmPassword" type="password" placeholder="Repeat password" required minlength="8" autocomplete="new-password">
+              </div>
             </div>
             <div class="field">
               <label for="phone">Contact number</label>
@@ -594,8 +609,42 @@
               <label for="medicalDetails">Medical notes (optional)</label>
               <textarea id="medicalDetails" name="medicalDetails" placeholder="e.g. asthma, pollen allergy, migraine triggers…"></textarea>
             </div>
-            <button type="submit" class="btn btn-primary auth-submit">Create account</button>
+            <p class="auth-error" id="signupError" role="alert" aria-live="polite"></p>
+            <button type="submit" class="btn btn-primary auth-submit" id="signupSubmitBtn">Create account</button>
             <p class="auth-note">Already have an account? <a href="#" id="switchToLogin">Log in</a></p>
+          </form>
+        </div>
+
+        <div class="auth-panel" id="authForgot" data-panel="forgot">
+          <h3>Reset your password</h3>
+          <p class="auth-sub">We'll email you a link to set a new one.</p>
+          <form id="forgotForm" autocomplete="on">
+            <div class="field">
+              <label for="forgotEmail">Email</label>
+              <input id="forgotEmail" name="email" type="email" placeholder="you@example.com" required autocomplete="email">
+            </div>
+            <p class="auth-error" id="forgotError" role="alert" aria-live="polite"></p>
+            <button type="submit" class="btn btn-primary auth-submit" id="forgotSubmitBtn">Send reset link</button>
+            <p class="auth-note"><a href="#" id="backToLoginFromForgot">Back to log in</a></p>
+          </form>
+        </div>
+
+        <div class="auth-panel" id="authReset" data-panel="reset">
+          <h3>Set a new password</h3>
+          <p class="auth-sub">Choose a new password for your account.</p>
+          <form id="resetForm" autocomplete="on">
+            <div class="field-row">
+              <div class="field">
+                <label for="resetPassword">New password</label>
+                <input id="resetPassword" name="password" type="password" placeholder="At least 8 characters" required minlength="8" autocomplete="new-password">
+              </div>
+              <div class="field">
+                <label for="resetConfirmPassword">Confirm password</label>
+                <input id="resetConfirmPassword" name="confirmPassword" type="password" placeholder="Repeat password" required minlength="8" autocomplete="new-password">
+              </div>
+            </div>
+            <p class="auth-error" id="resetError" role="alert" aria-live="polite"></p>
+            <button type="submit" class="btn btn-primary auth-submit" id="resetSubmitBtn">Update password</button>
           </form>
         </div>
       </div>
@@ -851,6 +900,7 @@
   </script>
 
   <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
     import * as THREE from 'three';
     import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
     import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
@@ -1561,6 +1611,8 @@ float snoise(vec3 v){
       document.querySelectorAll('.auth-panel').forEach(p => {
         p.classList.toggle('active', p.dataset.panel === tab);
       });
+      const tabs = document.querySelector('.auth-tabs');
+      if (tabs) tabs.style.display = (tab === 'forgot' || tab === 'reset') ? 'none' : '';
     }
     document.querySelectorAll('.auth-tab').forEach(btn => {
       btn.addEventListener('click', () => setAuthTab(btn.dataset.authTab));
@@ -1569,6 +1621,11 @@ float snoise(vec3 v){
     const switchToLogin = document.getElementById('switchToLogin');
     if (switchToSignup) switchToSignup.addEventListener('click', (e) => { e.preventDefault(); setAuthTab('signup'); });
     if (switchToLogin) switchToLogin.addEventListener('click', (e) => { e.preventDefault(); setAuthTab('login'); });
+
+    const openForgotPassword = document.getElementById('openForgotPassword');
+    const backToLoginFromForgot = document.getElementById('backToLoginFromForgot');
+    if (openForgotPassword) openForgotPassword.addEventListener('click', (e) => { e.preventDefault(); setAuthTab('forgot'); });
+    if (backToLoginFromForgot) backToLoginFromForgot.addEventListener('click', (e) => { e.preventDefault(); setAuthTab('login'); });
 
     const syncMedical = document.getElementById('syncMedical');
     const medicalWrap = document.getElementById('medicalDetailsWrap');
@@ -1587,18 +1644,183 @@ float snoise(vec3 v){
 
     const SIGNED_IN_DESTINATION = 'https://cloudeanxothotl.vercel.app/';
 
-    document.getElementById('loginForm')?.addEventListener('submit', (e) => {
+    // ===== Supabase project config =====
+    const SUPABASE_URL = 'https://gyypabtvkxeedqtwwmxl.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_ZoYZk01Rs9nJWQizMDjR3Q_igd3tjys';
+    const supabaseReady = SUPABASE_URL.startsWith('http') && !SUPABASE_ANON_KEY.startsWith('YOUR_');
+    const supabaseClient = supabaseReady ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+    function showAuthMessage(which, text) {
+      const el = document.getElementById(which + 'Error');
+      if (!el) return;
+      el.textContent = text;
+      el.classList.toggle('show', !!text);
+    }
+    function setAuthBusy(which, busy, busyLabel, idleLabel) {
+      const btn = document.getElementById(which + 'SubmitBtn');
+      if (!btn) return;
+      btn.disabled = busy;
+      btn.textContent = busy ? busyLabel : idleLabel;
+    }
+
+    document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      // Demo only — no backend. On "sign in", move on to the app.
-      window.location.href = SIGNED_IN_DESTINATION;
-    });
-    document.getElementById('signupForm')?.addEventListener('submit', (e) => {
-      e.preventDefault();
+      showAuthMessage('login', '');
+
+      if (!supabaseReady) {
+        showAuthMessage('login', 'This page is not connected to a database yet — add your Supabase URL and anon key in the script to enable real sign-in.');
+        return;
+      }
+
       const fd = new FormData(e.target);
-      console.log('Signup payload', Object.fromEntries(fd.entries()));
-      // Demo only — no backend. Creating an account signs you in too.
-      window.location.href = SIGNED_IN_DESTINATION;
+      const { email, password } = Object.fromEntries(fd.entries());
+
+      setAuthBusy('login', true, 'Logging in…', 'Log in');
+      try {
+        const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        window.location.href = SIGNED_IN_DESTINATION;
+      } catch (err) {
+        showAuthMessage('login', err.message || 'Could not log you in. Please try again.');
+      } finally {
+        setAuthBusy('login', false, 'Logging in…', 'Log in');
+      }
     });
+
+    document.getElementById('signupForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      showAuthMessage('signup', '');
+
+      if (!supabaseReady) {
+        showAuthMessage('signup', 'This page is not connected to a database yet — add your Supabase URL and anon key in the script to enable real account creation.');
+        return;
+      }
+
+      const fd = new FormData(e.target);
+      const payload = Object.fromEntries(fd.entries());
+
+      if (payload.password !== payload.confirmPassword) {
+        showAuthMessage('signup', 'Passwords do not match.');
+        return;
+      }
+      if (payload.password.length < 8) {
+        showAuthMessage('signup', 'Password must be at least 8 characters.');
+        return;
+      }
+
+      setAuthBusy('signup', true, 'Creating account…', 'Create account');
+      try {
+        // Create the account and hand the profile fields along as metadata.
+        // A database trigger (see supabase-setup.sql) copies these into the
+        // "profiles" table the instant the account row is created — this
+        // works whether or not email confirmation is required, and doesn't
+        // depend on the browser having a session yet.
+        const { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({
+          email: payload.email,
+          password: payload.password,
+          options: {
+            data: {
+              full_name: payload.fullName,
+              phone: payload.phone,
+              country: payload.country,
+              city: payload.city,
+              local_weather: payload.localWeather,
+              climate_anxiety: payload.climateAnxiety,
+              age: payload.age || '',
+              sync_medical: payload.syncMedical === 'yes',
+              medical_details: payload.syncMedical === 'yes' ? (payload.medicalDetails || '') : '',
+            },
+          },
+        });
+        if (signUpError) throw signUpError;
+
+        if (!signUpData.session) {
+          // Email confirmation is turned on for this project — there's no
+          // session yet, so tell the person to check their inbox instead of
+          // redirecting them into the signed-in app.
+          showAuthMessage('signup', 'Account created — check your email to confirm it, then log in.');
+          setAuthBusy('signup', false, 'Creating account…', 'Create account');
+          return;
+        }
+
+        window.location.href = SIGNED_IN_DESTINATION;
+      } catch (err) {
+        showAuthMessage('signup', err.message || 'Something went wrong creating your account.');
+        setAuthBusy('signup', false, 'Creating account…', 'Create account');
+      }
+    });
+
+    document.getElementById('forgotForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      showAuthMessage('forgot', '');
+
+      if (!supabaseReady) {
+        showAuthMessage('forgot', 'This page is not connected to a database yet — add your Supabase URL and anon key in the script to enable password reset.');
+        return;
+      }
+
+      const fd = new FormData(e.target);
+      const { email } = Object.fromEntries(fd.entries());
+
+      setAuthBusy('forgot', true, 'Sending…', 'Send reset link');
+      try {
+        // redirectTo points back at this same page, so when the person
+        // clicks the link in their email, Supabase brings them right back
+        // here with a recovery session — the listener below catches that
+        // and shows the "set a new password" panel automatically.
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.href.split('#')[0],
+        });
+        if (error) throw error;
+        showAuthMessage('forgot', 'Check your email for a link to reset your password.');
+      } catch (err) {
+        showAuthMessage('forgot', err.message || 'Could not send the reset email. Please try again.');
+      } finally {
+        setAuthBusy('forgot', false, 'Sending…', 'Send reset link');
+      }
+    });
+
+    document.getElementById('resetForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      showAuthMessage('reset', '');
+
+      const fd = new FormData(e.target);
+      const payload = Object.fromEntries(fd.entries());
+
+      if (payload.password !== payload.confirmPassword) {
+        showAuthMessage('reset', 'Passwords do not match.');
+        return;
+      }
+      if (payload.password.length < 8) {
+        showAuthMessage('reset', 'Password must be at least 8 characters.');
+        return;
+      }
+
+      setAuthBusy('reset', true, 'Updating…', 'Update password');
+      try {
+        const { error } = await supabaseClient.auth.updateUser({ password: payload.password });
+        if (error) throw error;
+        showAuthMessage('reset', 'Password updated — taking you in…');
+        setTimeout(() => { window.location.href = SIGNED_IN_DESTINATION; }, 1200);
+      } catch (err) {
+        showAuthMessage('reset', err.message || 'Could not update your password. Please try the reset link again.');
+        setAuthBusy('reset', false, 'Updating…', 'Update password');
+      }
+    });
+
+    // When someone clicks the reset link in their email, Supabase redirects
+    // back here and fires a PASSWORD_RECOVERY event once it's parsed the
+    // token from the URL. Catch that and jump straight to the "set new
+    // password" panel, opening the interior if it isn't already open.
+    if (supabaseReady) {
+      supabaseClient.auth.onAuthStateChange((event) => {
+        if (event === 'PASSWORD_RECOVERY') {
+          interiorEl.classList.add('open');
+          interiorEl.setAttribute('aria-hidden', 'false');
+          setAuthTab('reset');
+        }
+      });
+    }
 
     // Escape key
     window.addEventListener('keydown', (e) => {
