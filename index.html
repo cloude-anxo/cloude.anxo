@@ -1919,6 +1919,19 @@ float snoise(vec3 v){
       if (e.key === 'Escape' && diveState.active) exitEarth();
     });
 
+    // Enter key: same action as clicking "Press Enter to move forward" —
+    // dive in and open the sign-in window. Skipped while typing in a field,
+    // while focus is on another interactive control (so its own Enter
+    // behavior isn't hijacked), or while a modal is open.
+    window.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') return;
+      const tag = (e.target && e.target.tagName) || '';
+      const isInteractiveField = ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'A'].includes(tag) || (e.target && e.target.isContentEditable);
+      if (isInteractiveField) return;
+      if (document.querySelector('.modal.active')) return;
+      startEarthDive(e);
+    });
+
   </script>
 
   <!-- LIVE ENVIRONMENTAL SIGNALS: geolocation + Open-Meteo (no API key required) -->
