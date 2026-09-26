@@ -117,6 +117,59 @@
     .stat-value { font-size: clamp(30px,4vw,44px); font-weight: 800; background: linear-gradient(180deg,#fff,var(--accent)); -webkit-background-clip: text; color: transparent; line-height: 1.1; }
     .stat-label { font-size: 14px; color: var(--muted); margin-top: 8px; font-weight: 500; }
 
+    /* Live Environmental Signals */
+    .env-card { background: var(--glass); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: clamp(24px,4vw,40px); backdrop-filter: blur(14px); }
+    .env-btn-row { display: flex; justify-content: center; margin-bottom: 20px; }
+    .env-status { text-align: center; color: var(--muted); font-size: 14px; min-height: 20px; margin: 0 0 18px; }
+    .env-location { text-align: center; font-size: 18px; font-weight: 700; margin-bottom: 26px; }
+
+    .env-section { display: none; }
+    .env-section.visible { display: block; }
+    .env-section + .env-section { margin-top: clamp(28px,4vw,44px); }
+    .env-section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+    .env-section-head h3 { font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
+    .env-section-time { font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted-2); white-space: nowrap; }
+
+    .env-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px,1fr)); gap: 14px; }
+    @media (max-width: 720px) { .env-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 460px) { .env-grid { grid-template-columns: 1fr; } }
+
+    .env-stat { position: relative; text-align: left; background: rgba(255,255,255,.035); border: 1px solid var(--line); border-left: 3px solid var(--line-strong); border-radius: 14px; padding: 16px 16px 14px; transition: border-color .2s, background .2s, transform .2s; display: flex; flex-direction: column; }
+    .env-stat:hover { background: rgba(255,255,255,.06); transform: translateY(-2px); }
+    .env-stat.good { border-left-color: #57d38c; }
+    .env-stat.moderate { border-left-color: #f2c94c; }
+    .env-stat.warn { border-left-color: #f2994a; }
+    .env-stat.danger { border-left-color: #f26d6d; }
+
+    .env-stat-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+    .env-stat-icon { width: 36px; height: 36px; flex: none; border-radius: 10px; background: rgba(255,255,255,.06); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 17px; }
+    .env-stat-badge { font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 4px 9px; border-radius: 999px; border: 1px solid var(--line-strong); color: var(--muted); white-space: nowrap; line-height: 1.4; }
+    .env-stat.good .env-stat-badge { color: #57d38c; border-color: rgba(87,211,140,.4); background: rgba(87,211,140,.08); }
+    .env-stat.moderate .env-stat-badge { color: #f2c94c; border-color: rgba(242,201,76,.4); background: rgba(242,201,76,.08); }
+    .env-stat.warn .env-stat-badge { color: #f2994a; border-color: rgba(242,153,74,.4); background: rgba(242,153,74,.08); }
+    .env-stat.danger .env-stat-badge { color: #f26d6d; border-color: rgba(242,109,109,.4); background: rgba(242,109,109,.08); }
+
+    .env-stat-label { font-size: 10.5px; color: var(--muted-2); text-transform: uppercase; letter-spacing: .07em; font-weight: 700; margin-bottom: 4px; }
+    .env-stat-value { font-size: 26px; font-weight: 800; line-height: 1.15; margin-bottom: 8px; }
+    .env-stat-value .unit { font-size: 13px; font-weight: 600; color: var(--muted); margin-left: 2px; }
+    .env-stat-desc { font-size: 12.5px; color: var(--muted); line-height: 1.5; margin-bottom: 12px; }
+
+    .env-guidance { background: rgba(255,255,255,.03); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px 11px; margin-top: auto; }
+    .env-guidance-head { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+    .env-guidance-head::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+    .env-guidance-tip { font-size: 12.5px; color: var(--ink); line-height: 1.5; padding-left: 12px; position: relative; }
+    .env-guidance-tip::before { content: '•'; position: absolute; left: 0; color: var(--accent); }
+    .env-guidance-toggle { display: inline-flex; align-items: center; gap: 4px; margin-top: 7px; background: none; border: none; padding: 0; font: inherit; font-size: 10.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--accent-2); cursor: pointer; }
+    .env-guidance-toggle svg { width: 11px; height: 11px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform .2s; }
+    .env-guidance-toggle.open svg { transform: rotate(180deg); }
+    .env-guidance-list { list-style: none; margin: 0; padding: 0; max-height: 0; overflow: hidden; transition: max-height .25s ease, margin-top .25s ease; }
+    .env-guidance-list.open { max-height: 220px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); }
+    .env-guidance-list li { font-size: 12px; color: var(--muted); padding-left: 12px; position: relative; line-height: 1.55; }
+    .env-guidance-list li + li { margin-top: 5px; }
+    .env-guidance-list li::before { content: '•'; position: absolute; left: 0; color: var(--accent-2); }
+
+    .env-stat-updated { margin-top: 10px; font-size: 10px; color: var(--muted-2); }
+
     /* CTA & Footer */
     .cta-card { margin: 0 auto; max-width: 760px; padding: clamp(48px,7vw,80px) clamp(28px,5vw,64px); border-radius: var(--radius-lg); background: radial-gradient(120% 140% at 50% 0%, rgba(155,205,250,.12), transparent 55%), var(--glass-2); border: 1px solid var(--line-strong); box-shadow: var(--shadow); backdrop-filter: blur(18px); text-align: center; }
     .cta-card .hero-actions { margin-top: 32px; }
@@ -667,6 +720,10 @@
         <p class="hero-sub" data-reveal style="--rd: 180ms">Your environment and your health, gently connected. Cloude reads the air around you and syncs with what your body already knows.</p>
         <div class="hero-actions" data-reveal style="--rd: 300ms">
           <a href="#auth" class="btn btn-primary has-arrow js-enter-earth">Press Enter to move forward <svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+          <button type="button" class="btn btn-outline" id="heroDetectLocationBtn">
+            <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            Environmental Signals Around Me
+          </button>
         </div>
       </div>
       
@@ -705,6 +762,41 @@
       <div data-reveal style="--rd: 260ms; text-align:center; margin-top: clamp(32px,5vw,56px);">
         <p style="color:var(--muted); font-size:16px; margin-bottom: 18px;">Know more about Anxothotl: Project REACH</p>
         <a href="https://anxothotl-hdsk.vercel.app/" target="_blank" rel="noopener" class="btn btn-primary has-arrow">Project REACH <svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+      </div>
+    </section>
+
+    <!-- LIVE ENVIRONMENTAL SIGNALS -->
+    <section class="section" id="live-environment">
+      <div class="section-head" data-reveal>
+        <span class="eyebrow">Real-Time · Powered by Open-Meteo</span>
+        <h2>Environmental Signals Around Me</h2>
+        <p>Detect your location for an instant, on-demand read of the weather and air quality around you — no sign-up required.</p>
+      </div>
+      <div class="env-card" data-reveal style="max-width:960px;margin:0 auto;">
+        <div class="env-btn-row">
+          <button type="button" class="btn btn-primary has-arrow" id="detectLocationBtn">
+            <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            Environmental Signals Around Me
+          </button>
+        </div>
+        <p class="env-status" id="envStatus"></p>
+        <p class="env-location" id="envLocation" style="display:none;"></p>
+
+        <div class="env-section" id="envSectionKey">
+          <div class="env-section-head">
+            <h3>Key Signals</h3>
+            <span class="env-section-time" id="envUpdatedKey"></span>
+          </div>
+          <div class="env-grid" id="envGridKey"></div>
+        </div>
+
+        <div class="env-section" id="envSectionMore">
+          <div class="env-section-head">
+            <h3>More Environmental Signals</h3>
+            <span class="env-section-time" id="envUpdatedMore"></span>
+          </div>
+          <div class="env-grid" id="envGridMore"></div>
+        </div>
       </div>
     </section>
 
@@ -1827,6 +1919,399 @@ float snoise(vec3 v){
       if (e.key === 'Escape' && diveState.active) exitEarth();
     });
 
+  </script>
+
+  <!-- LIVE ENVIRONMENTAL SIGNALS: geolocation + Open-Meteo (no API key required) -->
+  <script>
+  (function () {
+    const btn = document.getElementById('detectLocationBtn');
+    const heroBtn = document.getElementById('heroDetectLocationBtn');
+    const statusEl = document.getElementById('envStatus');
+    const locEl = document.getElementById('envLocation');
+    const sectionKeyEl = document.getElementById('envSectionKey');
+    const sectionMoreEl = document.getElementById('envSectionMore');
+    const gridKeyEl = document.getElementById('envGridKey');
+    const gridMoreEl = document.getElementById('envGridMore');
+    const updatedKeyEl = document.getElementById('envUpdatedKey');
+    const updatedMoreEl = document.getElementById('envUpdatedMore');
+    if (!btn) return;
+
+    const WMO = {
+      0: 'Clear sky', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
+      45: 'Fog', 48: 'Depositing rime fog',
+      51: 'Light drizzle', 53: 'Drizzle', 55: 'Dense drizzle',
+      56: 'Freezing drizzle', 57: 'Dense freezing drizzle',
+      61: 'Light rain', 63: 'Rain', 65: 'Heavy rain',
+      66: 'Freezing rain', 67: 'Heavy freezing rain',
+      71: 'Light snow', 73: 'Snow', 75: 'Heavy snow', 77: 'Snow grains',
+      80: 'Light showers', 81: 'Showers', 82: 'Violent showers',
+      85: 'Snow showers', 86: 'Heavy snow showers',
+      95: 'Thunderstorm', 96: 'Thunderstorm with hail', 99: 'Severe thunderstorm'
+    };
+
+    function fmt(v, digits) {
+      if (v === null || v === undefined || Number.isNaN(v)) return '—';
+      return digits === undefined ? v : Number(v).toFixed(digits);
+    }
+
+    function nowStamp() {
+      return new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    }
+
+    function nearestIndex(times) {
+      const now = Date.now();
+      let best = 0, bestDiff = Infinity;
+      times.forEach(function (t, i) {
+        const diff = Math.abs(new Date(t).getTime() - now);
+        if (diff < bestDiff) { bestDiff = diff; best = i; }
+      });
+      return best;
+    }
+
+    function esc(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // ---- Per-signal classification + guidance ----
+
+    function aqiInfo(aqi) {
+      if (aqi === null || aqi === undefined) return { badge: '—', cls: '', desc: 'Air quality data unavailable.' };
+      if (aqi <= 50) return { badge: 'Good', cls: 'good', desc: 'Air quality is satisfactory for most people.' };
+      if (aqi <= 100) return { badge: 'Moderate', cls: 'moderate', desc: 'Acceptable air quality; a few pollutants may be a concern for a small group.' };
+      if (aqi <= 150) return { badge: 'Unhealthy (Sens.)', cls: 'warn', desc: 'Sensitive groups may experience health effects.' };
+      if (aqi <= 200) return { badge: 'Unhealthy', cls: 'danger', desc: 'Everyone may begin to experience health effects.' };
+      if (aqi <= 300) return { badge: 'Very Unhealthy', cls: 'danger', desc: 'Health alert: everyone may experience more serious effects.' };
+      return { badge: 'Hazardous', cls: 'danger', desc: 'Health warning of emergency conditions for the entire population.' };
+    }
+    function aqiTips(cls) {
+      if (cls === 'danger') return ['Wear N95/KN95 mask outdoors', 'Keep windows closed, run an air purifier', 'Avoid outdoor exercise entirely'];
+      if (cls === 'warn') return ['Wear N95/KN95 mask if sensitive', 'Limit prolonged outdoor exertion', 'Keep windows closed during peak hours'];
+      if (cls === 'moderate') return ['Sensitive groups should reduce prolonged outdoor exertion', 'Keep an eye on symptoms if you have asthma'];
+      return ['Enjoy the fresh air!', 'Good day for outdoor activity'];
+    }
+
+    function tempInfo(t) {
+      if (t === null || t === undefined) return { badge: '—', cls: '', desc: 'Temperature data unavailable.' };
+      if (t >= 38) return { badge: 'Extreme Heat', cls: 'danger', desc: 'Dangerously hot conditions.' };
+      if (t >= 32) return { badge: 'Hot', cls: 'warn', desc: 'Hot conditions detected.' };
+      if (t >= 18) return { badge: 'Pleasant', cls: 'good', desc: 'Pleasant conditions.' };
+      if (t >= 8) return { badge: 'Cool', cls: 'moderate', desc: 'Cool conditions detected.' };
+      return { badge: 'Cold', cls: 'danger', desc: 'Cold conditions detected.' };
+    }
+    function tempTips(cls) {
+      if (cls === 'danger') return ['Limit time outdoors', 'Dress in layers / stay hydrated', 'Check on vulnerable family and neighbors'];
+      if (cls === 'warn') return ['Stay hydrated', 'Avoid strenuous activity midday', 'Seek shade when possible'];
+      if (cls === 'moderate') return ['Bring a light jacket', 'Layer up for changing conditions'];
+      return ['Enjoy the pleasant weather!', 'Great conditions for outdoor plans'];
+    }
+
+    function humidityInfo(h) {
+      if (h === null || h === undefined) return { badge: '—', cls: '', desc: 'Humidity data unavailable.' };
+      if (h >= 80) return { badge: 'Very High', cls: 'danger', desc: 'Very High humidity levels detected.' };
+      if (h >= 60) return { badge: 'High', cls: 'warn', desc: 'High humidity levels detected.' };
+      if (h >= 30) return { badge: 'Moderate', cls: 'moderate', desc: 'Moderate humidity levels.' };
+      return { badge: 'Low', cls: 'good', desc: 'Low, comfortable humidity.' };
+    }
+    function humidityTips(cls) {
+      if (cls === 'danger') return ['Avoid strenuous outdoor exercise', 'Stay hydrated and take breaks in AC', 'Watch for signs of heat exhaustion'];
+      if (cls === 'warn') return ['Avoid strenuous outdoor exercise', 'Wear light, breathable clothing'];
+      if (cls === 'moderate') return ['Comfortable for most outdoor activity'];
+      return ['Drink extra water — low humidity can dry out skin', 'Comfortable conditions overall'];
+    }
+
+    function uvInfo(uv) {
+      if (uv === null || uv === undefined) return { badge: '—', cls: '', desc: 'UV data unavailable.' };
+      if (uv >= 11) return { badge: 'Extreme', cls: 'danger', desc: 'Extreme UV exposure risk.' };
+      if (uv >= 8) return { badge: 'Very High', cls: 'danger', desc: 'Very high UV exposure risk.' };
+      if (uv >= 6) return { badge: 'High', cls: 'warn', desc: 'High UV exposure risk.' };
+      if (uv >= 3) return { badge: 'Moderate', cls: 'moderate', desc: 'Moderate UV exposure risk.' };
+      return { badge: 'Low', cls: 'good', desc: 'Low UV exposure risk.' };
+    }
+    function uvTips(cls) {
+      if (cls === 'danger') return ['Apply SPF 50+ sunscreen', 'Avoid sun 10am–4pm', 'Wear a hat and UV-blocking sunglasses'];
+      if (cls === 'warn') return ['Apply SPF 30+ sunscreen', 'Seek shade during peak hours', 'Wear protective clothing'];
+      if (cls === 'moderate') return ['Apply SPF 30 sunscreen', 'Wear sunglasses outdoors'];
+      return ['Minimal protection needed', 'Sunglasses on bright days'];
+    }
+    function uvToSpf(uv) {
+      if (uv === null || uv === undefined) return '—';
+      if (uv < 3) return 'SPF 15+';
+      if (uv < 6) return 'SPF 30+';
+      if (uv < 8) return 'SPF 30–50+';
+      if (uv < 11) return 'SPF 50+';
+      return 'SPF 50+, avoid sun';
+    }
+
+    function pollenInfo(p) {
+      if (p === null || p === undefined) return { badge: '—', cls: '', desc: 'Live pollen data isn\'t available for this region.' };
+      if (p >= 100) return { badge: 'Very High', cls: 'danger', desc: 'Very high pollen levels — allergy symptoms likely.' };
+      if (p >= 50) return { badge: 'High', cls: 'warn', desc: 'High pollen levels detected.' };
+      if (p >= 20) return { badge: 'Moderate', cls: 'moderate', desc: 'Moderate pollen levels (seasonal estimate).' };
+      return { badge: 'Low', cls: 'good', desc: 'Low pollen levels detected.' };
+    }
+    function pollenTips(cls) {
+      if (cls === 'danger') return ['Take allergy medication proactively', 'Keep windows closed, shower after being outside', 'Avoid outdoor activity during peak morning hours'];
+      if (cls === 'warn') return ['Consider allergy medication', 'Shower and change clothes after time outside'];
+      if (cls === 'moderate') return ['Stay aware of changing symptoms', 'Keep windows closed on high-wind days'];
+      return ['Good day for allergy sufferers', 'Low risk of pollen-triggered symptoms'];
+    }
+
+    function windInfo(w) {
+      if (w === null || w === undefined) return { badge: '—', cls: '', desc: 'Wind data unavailable.' };
+      if (w >= 50) return { badge: 'Severe', cls: 'danger', desc: 'Severe wind conditions.' };
+      if (w >= 30) return { badge: 'Strong', cls: 'warn', desc: 'Strong, gusty winds.' };
+      if (w >= 12) return { badge: 'Breezy', cls: 'moderate', desc: 'Breezy conditions.' };
+      return { badge: 'Calm', cls: 'good', desc: 'Calm breeze.' };
+    }
+    function windTips(cls) {
+      if (cls === 'danger') return ['Storm or severe weather possible — stay indoors', 'Secure or bring in outdoor furniture', 'Avoid driving high-profile vehicles'];
+      if (cls === 'warn') return ['Secure loose balcony items', 'Be cautious cycling or driving high-sided vehicles'];
+      if (cls === 'moderate') return ['Secure loose light items outside', 'Good conditions for sailing/kites'];
+      return ['Pleasant conditions for outdoor activity'];
+    }
+
+    function visibilityInfo(v) {
+      if (v === null || v === undefined) return { badge: '—', cls: '', desc: 'Visibility data unavailable.' };
+      if (v < 1) return { badge: 'Very Low', cls: 'danger', desc: 'Very low visibility conditions.' };
+      if (v < 4) return { badge: 'Low', cls: 'warn', desc: 'Low visibility conditions.' };
+      if (v < 10) return { badge: 'Moderate', cls: 'moderate', desc: 'Moderate visibility conditions.' };
+      return { badge: 'Excellent', cls: 'good', desc: 'Excellent visibility conditions.' };
+    }
+    function visibilityTips(cls) {
+      if (cls === 'danger') return ['Avoid driving if possible', 'Use fog lights and reduce speed'];
+      if (cls === 'warn') return ['Use fog lights if driving', 'Increase following distance'];
+      if (cls === 'moderate') return ['Use fog lights if driving', 'Drive with extra caution at dusk'];
+      return ['Clear conditions for travel'];
+    }
+
+    function pressureInfo(p) {
+      if (p === null || p === undefined) return { badge: '—', cls: '', desc: 'Pressure data unavailable.' };
+      if (p < 1000) return { badge: 'Very Low', cls: 'danger', desc: 'Very Low atmospheric pressure.' };
+      if (p < 1013) return { badge: 'Low', cls: 'moderate', desc: 'Low atmospheric pressure.' };
+      if (p <= 1020) return { badge: 'Normal', cls: 'good', desc: 'Normal atmospheric pressure.' };
+      return { badge: 'High', cls: 'moderate', desc: 'High atmospheric pressure.' };
+    }
+    function pressureTips(cls) {
+      if (cls === 'danger') return ['Storm or severe weather possible', 'Those sensitive to pressure changes may feel headaches/joint pain'];
+      if (cls === 'moderate') return ['Weather may shift over the next day', 'Watch for changing conditions'];
+      return ['Stable weather expected'];
+    }
+
+    function dewInfo(d, temp) {
+      if (d === null || d === undefined) return { badge: '—', cls: '', desc: 'Dew point data unavailable.' };
+      if (d >= 24) return { badge: 'Oppressive', cls: 'danger', desc: 'Oppressive, very muggy conditions.' };
+      if (d >= 20) return { badge: 'Sticky', cls: 'warn', desc: 'Sticky comfort level.' };
+      if (d >= 16) return { badge: 'Muggy', cls: 'moderate', desc: 'Somewhat muggy conditions.' };
+      if (d >= 10) return { badge: 'Comfortable', cls: 'good', desc: 'Comfortable conditions.' };
+      return { badge: 'Dry', cls: 'good', desc: 'Dry, comfortable conditions.' };
+    }
+    function dewTips(cls) {
+      if (cls === 'danger') return ['May feel very muggy outdoors', 'Stay hydrated, seek AC when possible'];
+      if (cls === 'warn') return ['May feel slightly sticky outdoors', 'Light, breathable clothing recommended'];
+      if (cls === 'moderate') return ['Slightly humid — dress light'];
+      return ['Comfortable conditions outdoors'];
+    }
+
+    function spfInfo(uv) {
+      const info = uvInfo(uv);
+      return { badge: info.badge, cls: info.cls, desc: uv !== null && uv !== undefined ? (uvToSpf(uv) + ' needed for current UV level of ' + fmt(uv, 0) + '.') : 'UV data unavailable.' };
+    }
+
+    // ---- Card rendering ----
+
+    function statCard(id, icon, label, value, unit, info, tips, updated) {
+      const cls = info.cls || '';
+      const tipsList = tips && tips.length ? tips : [];
+      const first = tipsList[0] || 'No specific guidance right now.';
+      const rest = tipsList.slice(1);
+      return (
+        '<div class="env-stat ' + cls + '">' +
+          '<div class="env-stat-top">' +
+            '<div class="env-stat-icon">' + icon + '</div>' +
+            (info.badge && info.badge !== '—' ? '<span class="env-stat-badge">' + esc(info.badge) + '</span>' : '') +
+          '</div>' +
+          '<div class="env-stat-label">' + esc(label) + '</div>' +
+          '<div class="env-stat-value">' + value + (unit ? '<span class="unit">' + esc(unit) + '</span>' : '') + '</div>' +
+          '<div class="env-stat-desc">' + esc(info.desc || '') + '</div>' +
+          '<div class="env-guidance">' +
+            '<div class="env-guidance-head">AI Guidance</div>' +
+            '<div class="env-guidance-tip">' + esc(first) + '</div>' +
+            (rest.length ? (
+              '<button type="button" class="env-guidance-toggle" data-target="tips-' + id + '">' +
+                '<span class="toggle-label">Show tips</span>' +
+                '<svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>' +
+              '</button>' +
+              '<ul class="env-guidance-list" id="tips-' + id + '">' +
+                rest.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') +
+              '</ul>'
+            ) : '') +
+          '</div>' +
+          '<div class="env-stat-updated">Updated ' + updated + '</div>' +
+        '</div>'
+      );
+    }
+
+    async function loadEnvironment(lat, lon) {
+      statusEl.textContent = 'Reading the sky and air around you…';
+      try {
+        const weatherUrl = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon +
+          '&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m' +
+          '&hourly=dew_point_2m,visibility,uv_index' +
+          '&timezone=auto';
+        const airUrl = 'https://air-quality-api.open-meteo.com/v1/air-quality?latitude=' + lat + '&longitude=' + lon +
+          '&current=us_aqi,european_aqi,pm10,pm2_5,uv_index' +
+          '&hourly=alder_pollen,birch_pollen,grass_pollen,mugwort_pollen,olive_pollen,ragweed_pollen' +
+          '&timezone=auto';
+        const geoUrl = 'https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + lat + '&longitude=' + lon + '&localityLanguage=en';
+
+        const [weatherRes, airRes, geoRes] = await Promise.all([
+          fetch(weatherUrl),
+          fetch(airUrl),
+          fetch(geoUrl).catch(function () { return null; })
+        ]);
+        if (!weatherRes.ok) throw new Error('weather fetch failed');
+        const weather = await weatherRes.json();
+        const air = airRes.ok ? await airRes.json() : null;
+        let geo = null;
+        if (geoRes && geoRes.ok) {
+          try { geo = await geoRes.json(); } catch (e) { geo = null; }
+        }
+
+        const cur = weather.current || {};
+        const hIdx = (weather.hourly && weather.hourly.time) ? nearestIndex(weather.hourly.time) : 0;
+        const dewPoint = (weather.hourly && weather.hourly.dew_point_2m) ? weather.hourly.dew_point_2m[hIdx] : null;
+        const visibility = (weather.hourly && weather.hourly.visibility) ? weather.hourly.visibility[hIdx] : null;
+        let uv = (weather.hourly && weather.hourly.uv_index) ? weather.hourly.uv_index[hIdx] : null;
+
+        let aqi = null, pollen = null;
+        if (air) {
+          const acur = air.current || {};
+          aqi = acur.us_aqi !== undefined && acur.us_aqi !== null ? acur.us_aqi : acur.european_aqi;
+          if (acur.uv_index !== undefined && acur.uv_index !== null) uv = acur.uv_index;
+
+          if (air.hourly && air.hourly.time) {
+            const aIdx = nearestIndex(air.hourly.time);
+            const pollenKeys = ['grass_pollen', 'birch_pollen', 'alder_pollen', 'mugwort_pollen', 'olive_pollen', 'ragweed_pollen'];
+            let best = null, bestKey = null;
+            pollenKeys.forEach(function (k) {
+              const arr = air.hourly[k];
+              if (arr && arr[aIdx] !== undefined && arr[aIdx] !== null) {
+                if (best === null || arr[aIdx] > best) { best = arr[aIdx]; bestKey = k; }
+              }
+            });
+            if (best !== null) pollen = { value: best, type: bestKey.replace('_pollen', '') };
+          }
+        }
+
+        const desc = WMO[cur.weather_code] || 'Conditions unavailable';
+        const pressure = (cur.surface_pressure !== undefined && cur.surface_pressure !== null) ? cur.surface_pressure : cur.pressure_msl;
+        const temp = cur.temperature_2m;
+        const feelsLike = cur.apparent_temperature;
+        const humidity = cur.relative_humidity_2m;
+        const windSpeed = cur.wind_speed_10m;
+        const pollenVal = pollen ? pollen.value : null;
+
+        const aq = aqiInfo(aqi);
+        const tInfo = tempInfo(temp);
+        const hInfo = humidityInfo(humidity);
+        const uInfo = uvInfo(uv);
+        const pInfo = pollenInfo(pollenVal);
+        const sInfo = spfInfo(uv);
+        const wInfo = windInfo(windSpeed);
+        const vInfo = visibilityInfo(visibility !== null ? visibility / 1000 : null);
+        const prInfo = pressureInfo(pressure);
+        const dInfo = dewInfo(dewPoint);
+
+        let placeName = '';
+        if (geo) {
+          const parts = [geo.city || geo.locality, geo.principalSubdivision, geo.countryName].filter(Boolean);
+          placeName = parts.join(', ');
+        }
+
+        locEl.textContent = (placeName ? placeName + ' · ' : '') + desc + ' · ' + fmt(temp, 0) + '°C (feels ' + fmt(feelsLike, 0) + '°C)';
+        locEl.style.display = 'block';
+
+        tInfo.desc = 'Feels like ' + fmt(feelsLike, 0) + '°C. ' + tInfo.desc;
+        wInfo.desc = 'Wind direction: ' + fmt(cur.wind_direction_10m, 0) + '°. ' + wInfo.desc;
+        if (dewPoint !== null && temp !== null && temp !== undefined) {
+          dInfo.desc = 'Difference from temp: ' + fmt(Math.abs(temp - dewPoint), 0) + '°C. ' + dInfo.desc;
+        }
+
+        const stamp = nowStamp();
+
+        const keyCards = [
+          statCard('aqi', '🌫️', 'Air Quality Index', aqi !== null && aqi !== undefined ? fmt(aqi, 0) : '—', '', aq, aqiTips(aq.cls), stamp) ,
+          statCard('temp', '🌡️', 'Temperature', fmt(temp, 0), '°C', tInfo, tempTips(tInfo.cls), stamp),
+          statCard('humidity', '💧', 'Humidity', fmt(humidity, 0), '%', hInfo, humidityTips(hInfo.cls), stamp),
+          statCard('uv', '☀️', 'UV Index', fmt(uv, 0), '', uInfo, uvTips(uInfo.cls), stamp),
+          statCard('pollen', '🌸', 'Pollen Count', pollen ? fmt(pollen.value, 0) : '—', pollen ? '/m³' : '', pInfo, pollenTips(pInfo.cls), stamp)
+        ];
+
+        const moreCards = [
+          statCard('spf', '🧴', 'Recommended SPF', uvToSpf(uv), '', sInfo, uvTips(sInfo.cls), stamp),
+          statCard('wind', '🍃', 'Wind Speed', fmt(windSpeed, 0), ' km/h', wInfo, windTips(wInfo.cls), stamp),
+          statCard('visibility', '👁️', 'Visibility', visibility !== null ? fmt(visibility / 1000, 0) : '—', ' km', vInfo, visibilityTips(vInfo.cls), stamp),
+          statCard('pressure', '📊', 'Atmospheric Pressure', fmt(pressure, 0), ' hPa', prInfo, pressureTips(prInfo.cls), stamp),
+          statCard('dew', '💦', 'Dew Point', fmt(dewPoint, 0), '°C', dInfo, dewTips(dInfo.cls), stamp)
+        ];
+
+        gridKeyEl.innerHTML = keyCards.join('');
+        gridMoreEl.innerHTML = moreCards.join('');
+        updatedKeyEl.textContent = 'Updated ' + stamp;
+        updatedMoreEl.textContent = 'Updated ' + stamp;
+        sectionKeyEl.classList.add('visible');
+        sectionMoreEl.classList.add('visible');
+        statusEl.textContent = 'Updated just now · Source: Open-Meteo (open-meteo.com)';
+      } catch (err) {
+        statusEl.textContent = "Couldn't fetch live signals right now. Please try again in a moment.";
+      }
+    }
+
+    // Expand/collapse "Show tips" toggles (event delegation covers both grids)
+    document.addEventListener('click', function (e) {
+      const toggle = e.target.closest('.env-guidance-toggle');
+      if (!toggle) return;
+      const list = document.getElementById(toggle.getAttribute('data-target'));
+      if (!list) return;
+      const isOpen = list.classList.toggle('open');
+      toggle.classList.toggle('open', isOpen);
+      const labelEl = toggle.querySelector('.toggle-label');
+      if (labelEl) labelEl.textContent = isOpen ? 'Hide tips' : 'Show tips';
+    });
+
+    function detectLocation(scrollToResults) {
+      if (!('geolocation' in navigator)) {
+        statusEl.textContent = 'Geolocation is not supported by your browser.';
+        return;
+      }
+      statusEl.textContent = 'Detecting your location…';
+      sectionKeyEl.classList.remove('visible');
+      sectionMoreEl.classList.remove('visible');
+      locEl.style.display = 'none';
+      if (scrollToResults) {
+        const liveSection = document.getElementById('live-environment');
+        if (liveSection) liveSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      navigator.geolocation.getCurrentPosition(
+        function (pos) {
+          loadEnvironment(pos.coords.latitude.toFixed(4), pos.coords.longitude.toFixed(4));
+        },
+        function (err) {
+          if (err && err.code === 1) {
+            statusEl.textContent = 'Location access denied. Please enable location permissions and try again.';
+          } else {
+            statusEl.textContent = 'Could not detect your location. Please try again.';
+          }
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+      );
+    }
+
+    btn.addEventListener('click', function () { detectLocation(false); });
+    if (heroBtn) {
+      heroBtn.addEventListener('click', function () { detectLocation(true); });
+    }
+  })();
   </script>
 </body>
 </html>
