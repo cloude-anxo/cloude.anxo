@@ -1,134 +1,217 @@
-Cloude 🌍
+# Cloude 🌍
 
-Find your center in a changing world.
+### Find your center in a changing world.
 
-Cloude is a climate-intelligence project exploring how technology can help people better understand the relationship between environmental conditions and climate anxiety.
+Cloude is a technology-driven project exploring the connection between environmental conditions and climate anxiety.
 
-🌐 Live: "Cloude" (https://cloude-anxo.vercel.app/)
-
-«Powered by Anxothotl»
+🌐 **Live Demo:** https://cloude-anxo.vercel.app/
 
 ---
 
-🌱 About Cloude
+## 🌱 About Cloude
 
-Climate anxiety can be difficult to recognize when people don't understand the environmental signals around them or how those conditions may affect their everyday experience.
+Cloude was created to explore how technology can help people better understand environmental conditions around them and their relationship with climate-related anxiety.
 
-Cloude was created to explore this gap — combining environmental awareness, technology and mental-health research to create a more understandable way of engaging with climate-related concerns.
+The project began from a simple observation: people can experience worry or anxiety related to climate and environmental change without necessarily recognizing what they are experiencing.
 
-The project grew out of Project REACH, Anxothotl's research-driven mental-health outreach initiative.
-
----
-
-🖥️ This Repository
-
-This repository contains the public-facing entry point to Cloude.
-
-It includes:
-
-- 🌍 Cloude's landing page
-- 🔐 Sign-in experience
-- ✨ Interactive UI and animations
-- 🧭 Client-side navigation and routing
-- 🚀 Production deployment
-
-After signing in, users are directed to the main Cloude application, which is maintained separately.
-
-Project Structure
-
-Cloude
-│
-├── Landing Page
-│      ↓
-├── Sign In
-│      ↓
-└── Main Cloude Application
-       ↓
-   Separate Repository
+We wanted to explore whether making environmental information more understandable and personally relevant could help bridge that awareness gap.
 
 ---
 
-🔗 Explore the Project
+## 🔄 How Cloude Works
 
-🌐 Cloude Landing Page
+The overall project is divided into two connected parts:
 
-"Visit Cloude →" (https://cloude-anxo.vercel.app/)
+**Cloude Landing Page**  
+↓  
+**Sign In**  
+↓  
+**Main Cloude Application**  
+↓  
+**Environmental Analysis & User Experience**
 
-🧠 Main Cloude Application
+This repository contains the public-facing entry point of Cloude, including the landing page, sign-in experience, routing and interface.
 
-The main application contains the core Cloude experience and is maintained in a separate repository.
-
-"View the Cloude Application →" (https://github.com/cloude-anxo/cloudee)
-
-🌐 Live Application: "cloudee-nine.vercel.app" (https://cloudee-nine.vercel.app/)
-
----
-
-🔬 Project Background
-
-Cloude emerged from Project REACH, Anxothotl's flagship research-driven mental-health outreach initiative.
-
-Project REACH focuses on anxiety awareness and coping strategies through workshops, surveys and one-on-one interactions, and has reached 40,000+ young individuals across India.
-
-The research journey behind Project REACH eventually led us to explore climate anxiety as an under-recognized area and ask how technology could be used to help people better understand their environmental context.
-
-Research associated with the initiative has received feedback from faculty and researchers connected with institutions including:
-
-- Ashoka University
-- FLAME University
-- Princeton University
-- Dartmouth College
-- University of Southern California
+The main application is maintained separately.
 
 ---
 
-👩‍💻 My Contribution
+## 🖥️ This Repository
 
-Aakshi Arora
+This repository contains the first layer of the Cloude experience.
 
-Web Development · UI/UX · Technical Implementation
+### What I built
 
-I independently designed and developed the entire Cloude entry experience in this repository, including:
+- Landing page
+- User interface
+- Sign-in experience
+- Page routing
+- Animations and interactions
+- Responsive layout
+- Deployment
+- Integration with the main application
+- Ongoing maintenance
 
-- Designed and built the landing-page UI
-- Developed the sign-in interface
-- Implemented navigation and routing
-- Created the interface animations and interactions
-- Connected the entry experience to the main Cloude application
-- Deployed and maintained the project on Vercel
-
-This repository represents my end-to-end contribution to Cloude's public-facing web experience.
+The entire implementation of this repository was developed by me.
 
 ---
 
-🛠️ Tech Stack
+## 🔗 Main Cloude Application
+
+The main Cloude application is maintained in a separate repository.
+
+**Main Application:**  
+https://cloudee-nine.vercel.app/
+
+**GitHub Repository:**  
+https://github.com/cloude-anxo/cloudee
+
+Keeping the repositories separate allows the landing/entry experience and the main application to be developed independently.
+
+---
+
+## 🖼️ Product Preview
+
+### Landing Page
+
+![Cloude Landing Page](screenshots/landing-page.png)
+
+### Sign-In Experience
+
+![Cloude Sign In](screenshots/sign-in.png)
+
+### Main Experience
+
+![Cloude Application](screenshots/main-app.png)
+
+---
+
+## 🔬 Research Background
+
+Cloude grew out of work conducted under **Project REACH**, Anxothotl's research-driven mental health outreach initiative.
+
+Project REACH focuses on increasing awareness around anxiety and providing students with accessible ways to understand and discuss mental health.
+
+Through workshops, surveys and one-on-one interactions, the initiative has reached more than **40,000 young individuals across India**.
+
+The research behind the broader initiative helped inform our understanding of how young people experience anxiety and how awareness can influence the way they interpret and respond to it.
+
+Cloude represents an attempt to take some of those ideas into a technology-based experience.
+
+---
+
+## 🌍 Environmental Awareness
+
+One of the central ideas behind Cloude is connecting people with environmental information that is relevant to their surroundings.
+
+The main application explores environmental signals around the user by using location-based environmental and weather information.
+
+The project uses environmental data provided through **Open-Meteo** and incorporates historical information to help provide additional context around environmental conditions.
+
+> The environmental analysis functionality is part of the main Cloude application and is not contained in this repository.
+
+---
+
+## 👩‍💻 My Contribution
+
+### Aakshi Arora
+
+I independently developed the complete front-end entry experience contained in this repository.
+
+My work includes:
+
+- Designing the landing page
+- Building the interface
+- Implementing the sign-in experience
+- Creating page transitions and animations
+- Implementing routing
+- Connecting the entry experience to the main application
+- Deploying the website
+- Maintaining and improving the repository
+
+This project allowed me to work across both design and development rather than only contributing isolated pieces of code.
+
+---
+
+## 🛠️ Technologies
+
+The technologies used in this repository include:
 
 - HTML
 - CSS
 - JavaScript
 - Vercel
 
----
-
-🏢 Powered by Anxothotl
-
-Cloude is developed under Anxothotl, the organization behind Project REACH and the broader research and outreach work from which the project emerged.
+The main Cloude application has its own separate technical implementation.
 
 ---
 
-🚧 Project Status
+## 🏢 About Anxothotl
 
-Active Development
+Cloude is developed under **Anxothotl**, a student-led initiative working around mental health awareness, research and technology.
 
-The landing page and entry experience are deployed, while the broader Cloude ecosystem continues to evolve through separate components and repositories.
+The broader work includes research, student workshops and technology-based projects exploring mental health and environmental anxiety.
 
 ---
 
-🔗 Project Links
+## 🚧 Project Status
 
-Resource| Link
-🌍 Cloude Landing Page| "cloude-anxo.vercel.app" (https://cloude-anxo.vercel.app/)
-🧠 Main Application| "github.com/cloude-anxo/cloudee" (https://github.com/cloude-anxo/cloudee)
-🌐 Main Application Demo| "cloudee-nine.vercel.app" (https://cloudee-nine.vercel.app/)
-🏢 Organization| Anxothotl
-🔬 Research Initiative| Project REACH
+Cloude is an ongoing project.
+
+The landing page and entry experience are deployed and functional, while the main application continues to evolve as we develop and refine the product.
+
+---
+
+## 🔗 Project Links
+
+| Resource | Link |
+|---|---|
+| Cloude Landing Page | https://cloude-anxo.vercel.app/ |
+| Main Cloude Application | https://cloudee-nine.vercel.app/ |
+| Main Application Repository | https://github.com/cloude-anxo/cloudee |
+| Anxothotl | [Add link] |
+
+---
+
+## 📌 Why This Project
+
+Cloude sits at the intersection of:
+
+**Technology + Environmental Awareness + Mental Health**
+
+Rather than treating climate anxiety only as an abstract psychological concept, the project explores how technology can make environmental information more understandable and personally relevant.
+
+The goal is not simply to display environmental data, but to explore how people can better understand the conditions around them and their relationship with those conditions.
+
+---
+
+## 📈 Future Direction
+
+Future development may include:
+
+- Improving environmental analysis
+- Expanding historical comparisons
+- Improving the user experience
+- Adding more environmental indicators
+- Expanding research-backed features
+- Connecting environmental information with clearer awareness and coping resources
+
+---
+
+## 📄 Research & Recognition
+
+The broader Project REACH initiative and associated research have received feedback and recognition from academics and researchers associated with institutions including:
+
+- Princeton University
+- Ashoka University
+- FLAME University
+- Dartmouth College
+- University of Southern California
+
+These acknowledgements relate to the broader research and outreach work and should not be interpreted as institutions developing the Cloude application itself.
+
+---
+
+## ⭐ Project
+
+Cloude is an ongoing exploration of how technology can help people better understand a changing environment — and themselves within it.
