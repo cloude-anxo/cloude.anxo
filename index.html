@@ -628,7 +628,16 @@
       "three/examples/jsm/": "https://cdn.jsdelivr.net/npm/three@0.143.0/examples/jsm/"
     }
   }
-  </script>
+  </script> <!-- 1) Paste inside <head> of index.html -->
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#90b6d9">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<style>
+  .cloude-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#0e2238;color:#fff;
+    padding:14px 18px;border-radius:12px;font:500 15px system-ui,sans-serif;z-index:9999;max-width:90vw;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+  .cloude-toast button{margin-left:8px;padding:6px 14px;border:0;border-radius:8px;background:#8fc7ff;color:#0e2238;font-weight:600}
+</style>
 </head>
 <body>
 
@@ -1671,6 +1680,10 @@
   },{rootMargin:'-45% 0px -50% 0px'});
   ['login','introduction','recognitions'].forEach(function(id){var el=document.getElementById(id);if(el)io.observe(el);});
 })();
-</script>
+</script> <!-- 2) Paste just before </body> -->
+<button id="cloude-install" hidden onclick="cloudeInstall()">Install Cloude</button>
+<button onclick="cloudeTestAlert()">Try a Cloude alert</button>
+<script src="/pwa.js"></script>
+
 </body>
 </html>
