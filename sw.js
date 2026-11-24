@@ -1,5 +1,6 @@
-// Cloude service worker: the "background helper" that lets the site install and show notifications.
-const CACHE = 'cloude-v1';
+// Cloude service worker: installs the site, receives live alerts, and saves Yes/No answers
+// straight from the notification (no need to open the app on Android).
+const CACHE = 'cloude-v2';
 const SHELL = ['/', '/index.html', '/manifest.webmanifest', '/icons/icon-192.png'];
 
 self.addEventListener('install', (e) => {
@@ -20,31 +21,51 @@ self.addEventListener('fetch', (e) => {
   e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
 });
 
-// LATER: your backend will send push messages here.
+// A real alert arrives from the server.
 self.addEventListener('push', (e) => {
   const d = e.data ? e.data.json() : {};
-  e.waitUntil(showCloude(d.title, d.body, d.id));
+  e.waitUntil(
+    self.registration.showNotification(d.title || 'Cloude', {
+      body: d.body || '',
+      icon: '/icons/icon-192.png',
+      badge: '/icons/icon-192.png',
+      tag: d.type || 'cloude',
+      renotify: true,
+      requireInteraction: true,          // stays until you answer
+      data: { uid: d.uid, type: d.type || 'trial' },
+      actions: [                         // Yes/No buttons show on Android. iPhone ignores them.
+        { action: 'yes', title: 'Yes' },
+        { action: 'no', title: 'No' }
+      ]
+    })
+  );
 });
 
-function showCloude(title, body, id) {
-  return self.registration.showNotification(title || 'Cloude', {
-    body: body || '',
-    icon: '/icons/icon-192.png',
-    badge: '/icons/icon-192.png',
-    tag: id || 'cloude-checkin',
-    data: { id: id || 'demo' },
-    actions: [            // Yes/No buttons show on Android. iPhone ignores them.
-      { action: 'yes', title: 'Yes' },
-      { action: 'no', title: 'No' }
-    ]
-  });
-}
-
-// When you tap the notification or one of its buttons.
+// Tap Yes/No on the notification: save in the background, never open the app.
+// Tap the notification itself: open the big question page.
 self.addEventListener('notificationclick', (e) => {
-  e.notification.close();
-  const answer = e.action || 'ask';   // 'yes', 'no', or 'ask' (tapped the body: show buttons in app)
-  const url = '/?checkin=' + answer + '&id=' + encodeURIComponent(e.notification.data.id);
+  const n = e.notification;
+  const { uid, type } = n.data || {};
+  n.close();
+
+  if (e.action === 'yes' || e.action === 'no') {
+    e.waitUntil(
+      fetch('/api/answer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uid, type, answer: e.action })
+      })
+        .then((r) => { if (!r.ok) throw new Error('save failed'); return flash('Logged: ' + e.action.toUpperCase(), 'Thanks, Cloude saved your answer.'); })
+        .catch(() => self.registration.showNotification('Could not save your answer', {
+          body: 'Tap here to answer inside Cloude.',
+          icon: '/icons/icon-192.png',
+          data: { uid, type, open: true }
+        }))
+    );
+    return;
+  }
+
+  const url = '/checkin.html?type=' + encodeURIComponent(type || 'trial') + '&uid=' + encodeURIComponent(uid || '');
   e.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((wins) => {
       for (const w of wins) { if ('focus' in w) { w.navigate(url); return w.focus(); } }
@@ -52,3 +73,12 @@ self.addEventListener('notificationclick', (e) => {
     })
   );
 });
+
+// Tiny "Logged" confirmation that removes itself after a moment.
+function flash(title, body) {
+  return self.registration
+    .showNotification(title, { body, icon: '/icons/icon-192.png', tag: 'cloude-logged', silent: true })
+    .then(() => new Promise((r) => setTimeout(r, 2500)))
+    .then(() => self.registration.getNotifications({ tag: 'cloude-logged' }))
+    .then((list) => list.forEach((x) => x.close()));
+}

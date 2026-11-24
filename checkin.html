@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cloude check-in</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#90b6d9">
+<style>
+  :root{--sky:#90b6d9;--navy:#0e2238;--ice:#eef6fc;--yes:#1f9d63;--no:#c8553d}
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{background:var(--sky);color:var(--navy);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+    display:flex;flex-direction:column;justify-content:center;padding:max(24px,env(safe-area-inset-top)) 24px max(24px,env(safe-area-inset-bottom))}
+  main{max-width:520px;width:100%;margin:0 auto}
+  .alert{font-size:1rem;font-weight:600;opacity:.75;margin:0 0 12px}
+  h1{font-size:clamp(2rem,9vw,3rem);line-height:1.1;margin:0 0 32px;letter-spacing:-.02em}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  button{min-height:30vh;border:0;border-radius:28px;font:800 clamp(2rem,10vw,3rem) system-ui,sans-serif;color:#fff;cursor:pointer;
+    transition:transform .12s ease}
+  button:active{transform:scale(.96)}
+  button:focus-visible{outline:4px solid var(--navy);outline-offset:4px}
+  #yes{background:var(--yes)} #no{background:var(--no)}
+  .done{display:none;text-align:center}
+  .done h1{margin-bottom:12px}
+  .done p{font-size:1.15rem;margin:0}
+  body.answered .ask{display:none} body.answered .done{display:block}
+  .err{color:#7a1d0c;font-weight:600;min-height:1.4em;margin-top:16px}
+  @media (prefers-reduced-motion:reduce){button{transition:none}}
+</style>
+</head>
+<body>
+<main>
+  <section class="ask">
+    <p class="alert" id="alert"></p>
+    <h1 id="q">Loading...</h1>
+    <div class="row">
+      <button id="yes">Yes</button>
+      <button id="no">No</button>
+    </div>
+    <div class="err" id="err" role="alert"></div>
+  </section>
+  <section class="done">
+    <h1 id="thanks">Thanks, saved.</h1>
+    <p>You can close this page.</p>
+  </section>
+</main>
+<script>
+  const TEXT = {
+    trial: ['Trial alert: rain in about 40 min', 'Did you keep your inhaler in your bag?'],
+    rain:  ['Rain is coming soon', 'Did you carry your inhaler and an umbrella?'],
+    heat:  ['It is very hot outside', 'Did you drink water and stay out of the sun?'],
+    aqi:   ['The air is unhealthy', 'Did you wear a mask or stay indoors?'],
+    uv:    ['UV is very high', 'Did you cover up or wear sunscreen?']
+  };
+  const p = new URLSearchParams(location.search);
+  const type = TEXT[p.get('type')] ? p.get('type') : 'trial';
+  const uid = p.get('uid') || localStorage.getItem('cloude_uid') || '';
+  document.getElementById('alert').textContent = TEXT[type][0];
+  document.getElementById('q').textContent = TEXT[type][1];
+
+  async function answer(a) {
+    document.getElementById('err').textContent = '';
+    try {
+      const r = await fetch('/api/answer', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uid, type, answer: a }) });
+      if (!r.ok) throw new Error();
+      document.getElementById('thanks').textContent = 'Thanks, you said ' + a.toUpperCase() + '.';
+      document.body.classList.add('answered');
+    } catch (e) {
+      document.getElementById('err').textContent = 'Could not save. Check your internet and tap again.';
+    }
+  }
+  document.getElementById('yes').onclick = () => answer('yes');
+  document.getElementById('no').onclick = () => answer('no');
+</script>
+</body>
+</html>
