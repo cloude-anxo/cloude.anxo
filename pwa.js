@@ -49,7 +49,7 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ subscription: sub, lat: pos.coords.latitude, lon: pos.coords.longitude, trial })
     });
-    if (!r.ok) throw new Error('subscribe failed');
+    if (!r.ok) throw new Error('server said ' + r.status);
     return r.json();
   }
 
@@ -74,7 +74,7 @@
       banner('Cloude alerts are on', 'A trial alert is on its way: rain in about 40 min.', [['OK', hideBanner]]);
       setTimeout(hideBanner, 8000);
     } catch (e) {
-      banner('Something went wrong', 'Check your internet and try again.', [['Try again', enable]]);
+      banner('Something went wrong', 'Details: ' + (e && e.message ? e.message : e) + '. Send this to Claude.', [['Try again', enable]]);
     }
   }
   window.cloudeEnable = enable;
