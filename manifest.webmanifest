@@ -1,1 +1,15 @@
-{"name":"Cloude","short_name":"Cloude","description":"Calm climate signals around you","start_url":"/app/","scope":"/app/","display":"standalone","background_color":"#04060f","theme_color":"#04060f","icons":[{"src":"icon-192.png?v=2","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"icon-512.png?v=2","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}
+{
+  "name": "Cloude",
+  "short_name": "Cloude",
+  "description": "What today's weather and air actually mean for you.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#90b6d9",
+  "theme_color": "#90b6d9",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
