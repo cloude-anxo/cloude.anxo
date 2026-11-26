@@ -24,28 +24,28 @@ self.addEventListener('fetch', (e) => {
 // A real alert arrives from the server.
 self.addEventListener('push', (e) => {
   const d = e.data ? e.data.json() : {};
+  const type = d.type || 'trial';
+  const askYesNo = d.ask || type === 'trial';          // Yes/No buttons only for the trial (and anything marked ask)
+  const actions = askYesNo
+    ? [{ action: 'yes', title: 'Yes' }, { action: 'no', title: 'No' }]
+    : type === 'trips' ? [{ action: 'skip', title: 'Not now' }] : [];
   e.waitUntil(
     self.registration.showNotification(d.title || 'Cloude', {
       body: d.body || '',
       icon: '/icons/icon-192.png',
       badge: '/icons/icon-192.png',
-      tag: d.type || 'cloude',
+      tag: type,
       renotify: true,
-      requireInteraction: true,          // stays until you answer
-      data: { uid: d.uid, type: d.type || 'trial' },
-      actions: [                         // Yes/No buttons show on Android. iPhone ignores them.
-        { action: 'yes', title: 'Yes' },
-        { action: 'no', title: 'No' }
-      ]
+      requireInteraction: !!(d.emergency || askYesNo),   // emergency alerts stay until you look at them
+      data: { uid: d.uid, type, url: d.url || null },
+      actions
     })
   );
 });
 
-// Tap Yes/No on the notification: save in the background, never open the app.
-// Tap the notification itself: open the big question page.
 self.addEventListener('notificationclick', (e) => {
   const n = e.notification;
-  const { uid, type } = n.data || {};
+  const { uid, type, url: link } = n.data || {};
   n.close();
 
   if (e.action === 'yes' || e.action === 'no') {
@@ -65,7 +65,19 @@ self.addEventListener('notificationclick', (e) => {
     return;
   }
 
-  const url = '/checkin.html?type=' + encodeURIComponent(type || 'trial') + '&uid=' + encodeURIComponent(uid || '');
+  if (e.action === 'skip') {                           // "Not now" on the trips reminder: stop the reminders
+    e.waitUntil(
+      fetch('/api/me', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uid, action: 'skip' })
+      }).then(() => flash('Okay', 'No more trip reminders. You can add trips any time in Cloude.')).catch(() => {})
+    );
+    return;
+  }
+
+  // Tap the notification itself: open the page it points to (or the big question page for old-style alerts).
+  const url = link || ('/checkin.html?type=' + encodeURIComponent(type || 'trial') + '&uid=' + encodeURIComponent(uid || ''));
   e.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((wins) => {
       for (const w of wins) { if ('focus' in w) { w.navigate(url); return w.focus(); } }
@@ -74,7 +86,7 @@ self.addEventListener('notificationclick', (e) => {
   );
 });
 
-// Tiny "Logged" confirmation that removes itself after a moment.
+// Tiny confirmation that removes itself after a moment.
 function flash(title, body) {
   return self.registration
     .showNotification(title, { body, icon: '/icons/icon-192.png', tag: 'cloude-logged', silent: true })

@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your location and trips · Cloude</title>
+<style>
+  :root {
+    --bg: #f5f7f6; --card: #ffffff; --ink: #1d2a2b; --mute: #5d6b6c; --line: #d5dedc;
+    --accent: #1b6f63; --accent-ink: #ffffff; --warn: #a63d2a; --ok: #1b6f63;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #101617; --card: #182122; --ink: #e8f0ee; --mute: #9fb0ad; --line: #2c3a3b; --accent: #4fb5a5; --accent-ink: #08201c; --warn: #f09a86; --ok: #7fd1c2; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 560px; margin: 0 auto; padding: 20px 16px 48px; }
+  h1 { font-size: 1.5rem; line-height: 1.25; margin: 8px 0 4px; }
+  h2 { font-size: 1.1rem; margin: 0 0 8px; }
+  p { margin: 0 0 10px; }
+  .mute { color: var(--mute); font-size: .92rem; }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-top: 16px; }
+  label.lbl { display: block; font-weight: 600; margin: 14px 0 6px; }
+  input[type=text], input[type=time], textarea { width: 100%; font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+  textarea { min-height: 84px; resize: vertical; }
+  button { font: inherit; cursor: pointer; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--ink); padding: 10px 14px; min-height: 44px; }
+  button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+  button.link { border: 0; background: none; color: var(--mute); text-decoration: underline; padding: 8px 0; min-height: 0; }
+  button:disabled { opacity: .55; cursor: default; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .row { display: flex; gap: 8px; }
+  .row > input { flex: 1; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { display: inline-flex; align-items: center; }
+  .chip input { position: absolute; opacity: 0; pointer-events: none; }
+  .chip span { display: inline-block; padding: 9px 13px; border: 1px solid var(--line); border-radius: 999px; background: var(--bg); min-height: 44px; line-height: 24px; user-select: none; }
+  .chip input:checked + span { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+  .chip input:focus-visible + span { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .results { margin-top: 8px; display: grid; gap: 6px; }
+  .results button { text-align: left; }
+  .picked { margin-top: 8px; color: var(--ok); font-weight: 600; }
+  .msg { margin-top: 10px; font-size: .95rem; }
+  .msg.err { color: var(--warn); }
+  .msg.ok { color: var(--ok); }
+  .trip { border-top: 1px solid var(--line); padding: 12px 0; display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+  .trip:first-of-type { border-top: 0; }
+  .trip b { display: block; }
+  .hint { background: var(--bg); border-left: 4px solid var(--accent); padding: 10px 12px; border-radius: 4px; margin: 14px 0 0; font-size: .95rem; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Your location and regular trips</h1>
+  <p class="mute">Tell us where you are and where you go. We use it to send alerts that fit your day, and a heads-up before your trips.</p>
+
+  <section id="blocked" hidden>
+    <h2>Turn on alerts first</h2>
+    <p>We could not find alerts on this phone. Open Cloude, turn on alerts, then come back to this page.</p>
+    <p><a href="/">Open Cloude</a></p>
+  </section>
+
+  <div id="app" hidden>
+    <section>
+      <h2>1. Your location</h2>
+      <p class="mute">This picks the right alerts and timezone for you. If you travel, update it again.</p>
+      <button class="primary" id="shareBtn">Share my location</button>
+      <div class="msg" id="locMsg" role="status"></div>
+      <div id="manualBox" hidden>
+        <label class="lbl" for="areaQ">Or search your town or city</label>
+        <div id="areaPicker"></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>2. Add a regular trip</h2>
+      <div class="hint">Please add each trip in as much detail as you can: exact towns, the days, the time and how you travel. The more detail, the better we can fit alerts to your needs.</div>
+
+      <label class="lbl" for="fromQ">From</label>
+      <div id="fromPicker"></div>
+
+      <label class="lbl" for="toQ">To</label>
+      <div id="toPicker"></div>
+
+      <fieldset style="border:0;padding:0;margin:0">
+        <legend class="lbl">How do you travel? Pick all that apply</legend>
+        <div class="chips" id="modes">
+          <label class="chip"><input type="checkbox" value="driving"><span>Driving</span></label>
+          <label class="chip"><input type="checkbox" value="twowheeler"><span>Bike or scooter</span></label>
+          <label class="chip"><input type="checkbox" value="cycling"><span>Cycling</span></label>
+          <label class="chip"><input type="checkbox" value="walking"><span>Walking</span></label>
+          <label class="chip"><input type="checkbox" value="transit"><span>Bus, train or metro</span></label>
+        </div>
+      </fieldset>
+
+      <fieldset style="border:0;padding:0;margin:0">
+        <legend class="lbl">Which days?</legend>
+        <div class="chips" id="days"></div>
+      </fieldset>
+
+      <label class="lbl" for="depart">You usually leave at</label>
+      <input type="time" id="depart" value="08:30">
+
+      <label class="lbl" for="notes">Anything else we should know? (optional)</label>
+      <textarea id="notes" maxlength="500" placeholder="For example: I ride a scooter on the highway, I have asthma and need to know about smoke, I wait outside at the bus stop for 15 minutes."></textarea>
+
+      <p style="margin-top:14px"><button class="primary" id="saveTrip">Save trip</button></p>
+      <div class="msg" id="tripMsg" role="status"></div>
+    </section>
+
+    <section>
+      <h2>Your saved trips</h2>
+      <div id="tripList"><p class="mute">No trips yet.</p></div>
+      <button class="link" id="skipBtn">I do not have regular trips</button>
+      <div class="msg" id="skipMsg" role="status"></div>
+    </section>
+  </div>
+</main>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var endpoint = null;
+  var DAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
+  var DAY_NAME = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  var MODE_NAME = { driving: 'Driving', twowheeler: 'Bike or scooter', cycling: 'Cycling', walking: 'Walking', transit: 'Bus, train or metro' };
+  var PROFILE_NAME = { bay: 'Bay Area (°F, mph)', india: 'India (°C, km/h)', global: 'Everywhere else (°C, km/h)' };
+
+  function say(el, text, kind) { el.textContent = text || ''; el.className = 'msg' + (kind ? ' ' + kind : ''); }
+
+  function api(action, data) {
+    var body = Object.assign({ endpoint: endpoint, action: action }, data || {});
+    return fetch('/api/me', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Something went wrong'); return j; }); });
+  }
+
+  // A small "type a place, tap the right one" box.
+  function picker(box, id, onPick) {
+    box.innerHTML = '<div class="row"><input type="text" id="' + id + 'Q" autocomplete="off" placeholder="Town or city, for example Ferozepur"><button type="button">Search</button></div><div class="results"></div><div class="picked"></div>';
+    var input = box.querySelector('input'), btn = box.querySelector('button'), list = box.querySelector('.results'), picked = box.querySelector('.picked');
+    var state = { value: null };
+    function run() {
+      var q = input.value.trim();
+      if (!q) return;
+      list.innerHTML = '<span class="mute">Searching...</span>';
+      fetch('https://geocoding-api.open-meteo.com/v1/search?count=5&language=en&format=json&name=' + encodeURIComponent(q))
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          list.innerHTML = '';
+          if (!j.results || !j.results.length) { list.innerHTML = '<span class="mute">No match. Try the nearest bigger town.</span>'; return; }
+          j.results.forEach(function (p) {
+            var label = [p.name, p.admin1, p.country].filter(Boolean).join(', ');
+            var b = document.createElement('button');
+            b.type = 'button'; b.textContent = label;
+            b.onclick = function () {
+              state.value = { name: label, lat: p.latitude, lon: p.longitude };
+              picked.textContent = 'Selected: ' + label; list.innerHTML = '';
+              if (onPick) onPick(state.value);
+            };
+            list.appendChild(b);
+          });
+        })
+        .catch(function () { list.innerHTML = '<span class="mute">Could not search. Check your connection and try again.</span>'; });
+    }
+    btn.onclick = run;
+    input.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); run(); } };
+    state.reset = function () { state.value = null; input.value = ''; picked.textContent = ''; list.innerHTML = ''; };
+    return state;
+  }
+
+  var fromP, toP, areaP;
+
+  function renderDays() {
+    var box = $('days');
+    DAY_ORDER.forEach(function (d) {
+      var l = document.createElement('label'); l.className = 'chip';
+      l.innerHTML = '<input type="checkbox" value="' + d + '"' + (d >= 1 && d <= 5 ? ' checked' : '') + '><span>' + DAY_NAME[d] + '</span>';
+      box.appendChild(l);
+    });
+  }
+
+  function renderTrips(trips) {
+    var box = $('tripList');
+    if (!trips.length) { box.innerHTML = '<p class="mute">No trips yet.</p>'; return; }
+    box.innerHTML = '';
+    trips.forEach(function (t) {
+      var div = document.createElement('div'); div.className = 'trip';
+      var days = (t.days || []).slice().sort(function (a, b) { return DAY_ORDER.indexOf(a) - DAY_ORDER.indexOf(b); }).map(function (d) { return DAY_NAME[d]; }).join(', ');
+      var modes = (t.modes || []).map(function (m) { return MODE_NAME[m] || m; }).join(', ');
+      var info = document.createElement('div');
+      var title = document.createElement('b'); title.textContent = (t.from_name || '').split(',')[0] + ' to ' + (t.to_name || '').split(',')[0];
+      var sub = document.createElement('span'); sub.className = 'mute'; sub.textContent = modes + ' · ' + days + ' · ' + t.depart_time;
+      info.appendChild(title); info.appendChild(sub);
+      var del = document.createElement('button'); del.type = 'button'; del.textContent = 'Delete';
+      del.onclick = function () {
+        del.disabled = true;
+        api('delTrip', { id: t.id }).then(load).catch(function (e) { del.disabled = false; say($('tripMsg'), e.message, 'err'); });
+      };
+      div.appendChild(info); div.appendChild(del); box.appendChild(div);
+    });
+  }
+
+  function load() {
+    return api('get').then(function (j) {
+      renderTrips(j.trips || []);
+      if (j.profile) say($('locMsg'), 'Alerts are set for: ' + (PROFILE_NAME[j.profile] || j.profile) + '.', 'ok');
+      if (j.skipped) say($('skipMsg'), 'Reminders are off. You can still add trips any time.');
+    });
+  }
+
+  function sendLocation(lat, lon) {
+    var tz = ''; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
+    return api('location', { lat: lat, lon: lon, tz: tz }).then(function (j) {
+      say($('locMsg'), 'Saved. Alerts are set for: ' + (PROFILE_NAME[j.profile] || j.profile) + '.', 'ok');
+      $('manualBox').hidden = true;
+    });
+  }
+
+  $('shareBtn').onclick = function () {
+    if (!navigator.geolocation) { $('manualBox').hidden = false; say($('locMsg'), 'This phone cannot share location. Search your town below.', 'err'); return; }
+    say($('locMsg'), 'Waiting for your permission...');
+    navigator.geolocation.getCurrentPosition(
+      function (pos) { sendLocation(pos.coords.latitude, pos.coords.longitude).catch(function (e) { say($('locMsg'), e.message, 'err'); }); },
+      function () { $('manualBox').hidden = false; say($('locMsg'), 'Location was not shared. Search your town below instead.', 'err'); },
+      { enableHighAccuracy: false, timeout: 15000, maximumAge: 600000 }
+    );
+  };
+
+  $('saveTrip').onclick = function () {
+    var modes = Array.prototype.map.call($('modes').querySelectorAll('input:checked'), function (i) { return i.value; });
+    var days = Array.prototype.map.call($('days').querySelectorAll('input:checked'), function (i) { return parseInt(i.value, 10); });
+    if (!fromP.value) return say($('tripMsg'), 'Choose where the trip starts: search, then tap a result.', 'err');
+    if (!toP.value) return say($('tripMsg'), 'Choose where the trip ends: search, then tap a result.', 'err');
+    if (!modes.length) return say($('tripMsg'), 'Pick at least one way you travel.', 'err');
+    if (!days.length) return say($('tripMsg'), 'Pick at least one day.', 'err');
+    if (!$('depart').value) return say($('tripMsg'), 'Set the time you usually leave.', 'err');
+    var btn = $('saveTrip'); btn.disabled = true; say($('tripMsg'), 'Saving...');
+    api('addTrip', { from: fromP.value, to: toP.value, modes: modes, days: days, depart: $('depart').value, notes: $('notes').value })
+      .then(function () {
+        say($('tripMsg'), 'Trip saved. We will check the weather about 30 minutes before you leave.', 'ok');
+        fromP.reset(); toP.reset(); $('notes').value = '';
+        Array.prototype.forEach.call($('modes').querySelectorAll('input'), function (i) { i.checked = false; });
+        return load();
+      })
+      .catch(function (e) { say($('tripMsg'), e.message, 'err'); })
+      .then(function () { btn.disabled = false; });
+  };
+
+  $('skipBtn').onclick = function () {
+    api('skip').then(function () { say($('skipMsg'), 'Okay. No more reminders. You can add trips any time.', 'ok'); })
+      .catch(function (e) { say($('skipMsg'), e.message, 'err'); });
+  };
+
+  function start() {
+    if (!('serviceWorker' in navigator)) return Promise.resolve(null);
+    return navigator.serviceWorker.getRegistration()
+      .then(function (reg) { return reg && reg.pushManager.getSubscription(); })
+      .then(function (sub) { return sub ? sub.endpoint : null; })
+      .catch(function () { return null; });
+  }
+
+  start().then(function (ep) {
+    if (!ep) { $('blocked').hidden = false; return; }
+    endpoint = ep;
+    $('app').hidden = false;
+    fromP = picker($('fromPicker'), 'from');
+    toP = picker($('toPicker'), 'to');
+    areaP = picker($('areaPicker'), 'area', function (p) {
+      sendLocation(p.lat, p.lon).catch(function (e) { say($('locMsg'), e.message, 'err'); });
+    });
+    renderDays();
+    load().catch(function (e) {
+      if (/not_subscribed/.test(e.message)) { $('app').hidden = true; $('blocked').hidden = false; }
+    });
+  });
+})();
+</script>
+</body>
+</html>
