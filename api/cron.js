@@ -29,6 +29,7 @@ module.exports = async (req, res) => {
   trips.forEach((t) => { (byUser[t.sub_id] = byUser[t.sub_id] || []).push(t); });
 
   const stats = { checked: subs.length, sent: 0, removed: 0 };
+  db('alert_log?sent_at=lt.' + new Date(Date.now() - 30 * 86400000).toISOString(), { method: 'DELETE' }).catch(() => {});   // history is kept for 30 days
   const cache = {};                            // one weather lookup per place, shared by everyone there
   const ctxFor = (s, P) => {
     const key = r2(s.lat) + ',' + r2(s.lon);
@@ -50,7 +51,11 @@ module.exports = async (req, res) => {
     if (s.profile !== P.id || s.tz !== ctx.W.timezone) { patch.profile = P.id; patch.tz = ctx.W.timezone; }
 
     const send = async (payload) => {
-      try { await push(s, payload); stats.sent++; sentRun = true; return true; }
+      try {
+        await push(s, payload); stats.sent++; sentRun = true;
+        db('alert_log', { method: 'POST', body: { sub_id: s.id, type: payload.type || null, title: String(payload.title || '').slice(0, 200), body: String(payload.body || '').slice(0, 500) } }).catch(() => {});   // history; never blocks sending
+        return true;
+      }
       catch (e) {
         if (e.statusCode === 404 || e.statusCode === 410) {      // phone uninstalled or blocked us
           await db('subscriptions?id=eq.' + s.id, { method: 'DELETE' }).catch(() => {});
@@ -100,7 +105,7 @@ module.exports = async (req, res) => {
 
     // 3) Trip alerts: about 30 minutes before each saved trip leaves.
     for (const t of myTrips) {
-      if ((t.days || []).indexOf(k.dow) < 0 || t.last_alert === k.today) continue;
+      if (t.paused || (t.days || []).indexOf(k.dow) < 0 || t.last_alert === k.today) continue;
       const hh = parseInt(String(t.depart_time).slice(0, 2), 10), mm = parseInt(String(t.depart_time).slice(3, 5), 10);
       const until = hh * 60 + mm - (k.hour * 60 + k.minute);
       if (until < 5 || until > 45) continue;
@@ -116,8 +121,8 @@ module.exports = async (req, res) => {
         (!s.trip_reminder_at || now - Date.parse(s.trip_reminder_at) >= REMIND_EVERY)) {
       const firstOne = s.trip_reminders === 0;
       const ok = await send({
-        title: firstOne ? 'Update your location and regular trips' : 'Add your regular trips',
-        body: firstOne ? 'Tap to share your location and add trips, so alerts fit your day.'
+        title: firstOne ? 'Add your regular trips' : 'Still want trip alerts?',
+        body: firstOne ? 'Tap to add the trips you make often and how you travel, so we can warn you on the way.'
           : 'Tap to add your trips and how you travel, so we can warn you on the way.',
         type: 'trips', url: '/trips.html', ttl: 6 * 3600
       });
