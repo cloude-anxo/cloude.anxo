@@ -23,17 +23,17 @@ async function db(path, { method = 'GET', body, prefer } = {}) {
   return t ? JSON.parse(t) : null;
 }
 
-// What each alert says. Same wording as the check-in page.
+// The original one-time trial alert (used by subscribe.js).
 const MESSAGES = {
-  trial: ['Trial alert: rain in about 40 min. Windy.', 'Cloude suggests keeping your inhaler in your bag. Did you?'],
-  rain:  (min) => ['Rain in about ' + min + ' min', 'Carry your inhaler and an umbrella. Did you?'],
-  heat:  () => ['It is very hot outside', 'Drink water and stay out of the sun. Did you?'],
-  aqi:   () => ['The air is unhealthy right now', 'Wear a mask or stay indoors. Did you?'],
-  uv:    () => ['UV is very high', 'Cover up or wear sunscreen. Did you?']
+  trial: ['Trial alert: rain in about 40 min. Windy.', 'Cloude suggests keeping your inhaler in your bag. Did you?']
 };
 
+// payload: { title, body, type, url?, emergency?, ask?, ttl? }
 async function push(sub, payload) {
-  return webpush.sendNotification(sub.sub, JSON.stringify({ ...payload, uid: sub.id }), { TTL: 3600, urgency: 'high' });
+  return webpush.sendNotification(sub.sub, JSON.stringify({ ...payload, uid: sub.id }), {
+    TTL: payload.ttl || 3600,
+    urgency: payload.emergency ? 'high' : 'normal'
+  });
 }
 
 module.exports = { db, push, MESSAGES };
