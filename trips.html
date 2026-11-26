@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Your location and trips · Cloude</title>
+<title>My trips · Cloude</title>
 <style>
   :root {
     --bg: #f5f7f6; --card: #ffffff; --ink: #1d2a2b; --mute: #5d6b6c; --line: #d5dedc;
@@ -46,12 +46,17 @@
   .trip:first-of-type { border-top: 0; }
   .trip b { display: block; }
   .hint { background: var(--bg); border-left: 4px solid var(--accent); padding: 10px 12px; border-radius: 4px; margin: 14px 0 0; font-size: .95rem; }
+  .acts { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+  .acts button { padding: 8px 12px; min-height: 40px; }
+  .trip.off b, .trip.off .mute { opacity: .6; }
+  .badge { display: inline-block; margin-left: 6px; padding: 1px 8px; border: 1px solid var(--line); border-radius: 999px; font-size: .8rem; font-weight: 600; }
   [hidden] { display: none !important; }
 </style>
 </head>
 <body>
 <main>
-  <h1>Your location and regular trips</h1>
+  <h1>My trips</h1>
+  <p><a href="/history.html">See my alert history</a> · <a href="/">Back to Cloude</a></p>
   <p class="mute">Tell us where you are and where you go. We use it to send alerts that fit your day, and a heads-up before your trips.</p>
 
   <section id="blocked" hidden>
@@ -73,7 +78,7 @@
     </section>
 
     <section>
-      <h2>2. Add a regular trip</h2>
+      <h2 id="formTitle">2. Add a regular trip</h2>
       <div class="hint">Please add each trip in as much detail as you can: exact towns, the days, the time and how you travel. The more detail, the better we can fit alerts to your needs.</div>
 
       <label class="lbl" for="fromQ">From</label>
@@ -104,7 +109,7 @@
       <label class="lbl" for="notes">Anything else we should know? (optional)</label>
       <textarea id="notes" maxlength="500" placeholder="For example: I ride a scooter on the highway, I have asthma and need to know about smoke, I wait outside at the bus stop for 15 minutes."></textarea>
 
-      <p style="margin-top:14px"><button class="primary" id="saveTrip">Save trip</button></p>
+      <p style="margin-top:14px"><button class="primary" id="saveTrip">Save trip</button> <button type="button" id="cancelEdit" hidden>Cancel edit</button></p>
       <div class="msg" id="tripMsg" role="status"></div>
     </section>
 
@@ -164,6 +169,7 @@
     }
     btn.onclick = run;
     input.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); run(); } };
+    state.set = function (v) { state.value = v; input.value = ''; list.innerHTML = ''; picked.textContent = 'Selected: ' + v.name; };
     state.reset = function () { state.value = null; input.value = ''; picked.textContent = ''; list.innerHTML = ''; };
     return state;
   }
@@ -191,14 +197,53 @@
       var title = document.createElement('b'); title.textContent = (t.from_name || '').split(',')[0] + ' to ' + (t.to_name || '').split(',')[0];
       var sub = document.createElement('span'); sub.className = 'mute'; sub.textContent = modes + ' · ' + days + ' · ' + t.depart_time;
       info.appendChild(title); info.appendChild(sub);
-      var del = document.createElement('button'); del.type = 'button'; del.textContent = 'Delete';
-      del.onclick = function () {
-        del.disabled = true;
-        api('delTrip', { id: t.id }).then(load).catch(function (e) { del.disabled = false; say($('tripMsg'), e.message, 'err'); });
-      };
-      div.appendChild(info); div.appendChild(del); box.appendChild(div);
+      if (t.paused) { div.className += ' off'; var bd = document.createElement('span'); bd.className = 'badge'; bd.textContent = 'Paused'; title.appendChild(bd); }
+      var acts = document.createElement('div'); acts.className = 'acts';
+      function mk(label, fn) { var b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.onclick = function () { fn(b); }; acts.appendChild(b); }
+      mk('Edit', function () { startEdit(t); });
+      mk(t.paused ? 'Resume' : 'Pause', function (b) {
+        b.disabled = true;
+        api('pauseTrip', { id: t.id, paused: !t.paused }).then(load).catch(function (e) { b.disabled = false; say($('tripMsg'), e.message, 'err'); });
+      });
+      mk('Delete', function (b) {
+        if (!confirm('Delete this trip?')) return;
+        b.disabled = true;
+        api('delTrip', { id: t.id }).then(function () { if (editingId === t.id) resetForm(); return load(); }).catch(function (e) { b.disabled = false; say($('tripMsg'), e.message, 'err'); });
+      });
+      div.appendChild(info); div.appendChild(acts); box.appendChild(div);
     });
   }
+
+  var editingId = null;
+
+  function setChecks(box, values) {
+    Array.prototype.forEach.call(box.querySelectorAll('input'), function (i) { i.checked = values.indexOf(i.type === 'checkbox' && box.id === 'days' ? parseInt(i.value, 10) : i.value) >= 0; });
+  }
+
+  function resetForm() {
+    editingId = null;
+    fromP.reset(); toP.reset(); $('notes').value = ''; $('depart').value = '08:30';
+    setChecks($('modes'), []); setChecks($('days'), [1, 2, 3, 4, 5]);
+    $('formTitle').textContent = '2. Add a regular trip';
+    $('saveTrip').textContent = 'Save trip';
+    $('cancelEdit').hidden = true;
+  }
+
+  function startEdit(t) {
+    editingId = t.id;
+    fromP.set({ name: t.from_name, lat: t.from_lat, lon: t.from_lon });
+    toP.set({ name: t.to_name, lat: t.to_lat, lon: t.to_lon });
+    setChecks($('modes'), t.modes || []); setChecks($('days'), t.days || []);
+    $('depart').value = String(t.depart_time || '').slice(0, 5) || '08:30';
+    $('notes').value = t.notes || '';
+    $('formTitle').textContent = 'Edit your trip';
+    $('saveTrip').textContent = 'Save changes';
+    $('cancelEdit').hidden = false;
+    say($('tripMsg'), 'Change what you need, then tap Save changes. To change a place, search for it again.');
+    $('formTitle').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  $('cancelEdit').onclick = function () { resetForm(); say($('tripMsg'), ''); };
 
   function load() {
     return api('get').then(function (j) {
@@ -235,11 +280,13 @@
     if (!days.length) return say($('tripMsg'), 'Pick at least one day.', 'err');
     if (!$('depart').value) return say($('tripMsg'), 'Set the time you usually leave.', 'err');
     var btn = $('saveTrip'); btn.disabled = true; say($('tripMsg'), 'Saving...');
-    api('addTrip', { from: fromP.value, to: toP.value, modes: modes, days: days, depart: $('depart').value, notes: $('notes').value })
+    var wasEdit = !!editingId;
+    var payload = { from: fromP.value, to: toP.value, modes: modes, days: days, depart: $('depart').value, notes: $('notes').value };
+    if (wasEdit) payload.id = editingId;
+    api(wasEdit ? 'updTrip' : 'addTrip', payload)
       .then(function () {
-        say($('tripMsg'), 'Trip saved. We will check the weather about 30 minutes before you leave.', 'ok');
-        fromP.reset(); toP.reset(); $('notes').value = '';
-        Array.prototype.forEach.call($('modes').querySelectorAll('input'), function (i) { i.checked = false; });
+        resetForm();
+        say($('tripMsg'), wasEdit ? 'Trip updated.' : 'Trip saved. We will check the weather about 30 minutes before you leave.', 'ok');
         return load();
       })
       .catch(function (e) { say($('tripMsg'), e.message, 'err'); })

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alert history · Cloude</title>
+<style>
+  :root { --bg:#f5f7f6; --card:#ffffff; --ink:#1d2a2b; --mute:#5d6b6c; --line:#d5dedc; --accent:#1b6f63; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#101617; --card:#182122; --ink:#e8f0ee; --mute:#9fb0ad; --line:#2c3a3b; --accent:#4fb5a5; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:560px; margin:0 auto; padding:20px 16px 48px; }
+  h1 { font-size:1.5rem; margin:8px 0 4px; }
+  p { margin:0 0 10px; }
+  .mute { color:var(--mute); font-size:.92rem; }
+  a { color:var(--accent); }
+  .item { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 14px; margin-top:10px; }
+  .item b { display:block; }
+  .meta { display:flex; justify-content:space-between; gap:8px; margin-top:6px; color:var(--mute); font-size:.85rem; }
+  .tag { border:1px solid var(--line); border-radius:999px; padding:0 8px; }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Alert history</h1>
+  <p><a href="/trips.html">My trips</a> · <a href="/">Back to Cloude</a></p>
+  <p class="mute">The last notifications Cloude sent to this phone, newest first. We keep them for 30 days.</p>
+
+  <div id="blocked" hidden>
+    <div class="item"><b>Turn on alerts first</b><p class="mute">We could not find alerts on this phone. Open Cloude, turn on alerts, then come back.</p></div>
+  </div>
+  <div id="list"></div>
+  <p id="empty" class="mute" hidden>Nothing yet. Alerts will show up here after they are sent.</p>
+  <p id="err" class="mute" hidden></p>
+</main>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var KIND = { brief: 'Morning briefing', trip: 'Trip alert', trips: 'Reminder', trial: 'Trial alert', nws: 'Official warning' };
+
+  function when(iso) {
+    var d = new Date(iso), now = new Date();
+    var t = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    var same = d.toDateString() === now.toDateString();
+    var y = new Date(now); y.setDate(now.getDate() - 1);
+    if (same) return 'Today, ' + t;
+    if (d.toDateString() === y.toDateString()) return 'Yesterday, ' + t;
+    return d.toLocaleDateString([], { day: 'numeric', month: 'short' }) + ', ' + t;
+  }
+
+  function getEndpoint() {
+    if (!('serviceWorker' in navigator)) return Promise.resolve(null);
+    return navigator.serviceWorker.getRegistration()
+      .then(function (reg) { return reg && reg.pushManager.getSubscription(); })
+      .then(function (sub) { return sub ? sub.endpoint : null; })
+      .catch(function () { return null; });
+  }
+
+  getEndpoint().then(function (ep) {
+    if (!ep) { $('blocked').hidden = false; return; }
+    return fetch('/api/me', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ endpoint: ep, action: 'history' }) })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'failed'); return j; }); })
+      .then(function (j) {
+        var items = j.items || [];
+        if (!items.length) { $('empty').hidden = false; return; }
+        items.forEach(function (a) {
+          var d = document.createElement('div'); d.className = 'item';
+          var t = document.createElement('b'); t.textContent = a.title || 'Cloude';
+          var p = document.createElement('div'); p.textContent = a.body || '';
+          var m = document.createElement('div'); m.className = 'meta';
+          var w = document.createElement('span'); w.textContent = when(a.sent_at);
+          var k = document.createElement('span'); k.className = 'tag';
+          k.textContent = KIND[a.type] || (String(a.type || '').indexOf('nws') === 0 ? KIND.nws : 'Weather alert');
+          m.appendChild(w); m.appendChild(k);
+          d.appendChild(t); d.appendChild(p); d.appendChild(m);
+          $('list').appendChild(d);
+        });
+      })
+      .catch(function (e) {
+        if (/not_subscribed/.test(e.message)) { $('blocked').hidden = false; return; }
+        $('err').hidden = false; $('err').textContent = 'Could not load your history. Check your connection and try again.';
+      });
+  });
+})();
+</script>
+</body>
+</html>
