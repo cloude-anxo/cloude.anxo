@@ -57,8 +57,19 @@ async function tripAlert(t, P) {
   else if (dTemp >= 8) issues.push(B + ' is about ' + f.d(dTemp) + ' hotter than ' + A + '. Carry water.');
   if (exposed && feels >= P.heat) issues.push('Hot on your route (feels like ' + f.t(feels) + '). Carry water.');
 
-  if (!issues.length) return null;
-  return { title: A + ' to ' + B + ' trip', body: issues.slice(0, 2).join(' ') };
+  if (!issues.length) {
+    // Good trip: still tell them, so they know the check ran.
+    const allTemps = flat(S, 'apparent_temperature');
+    const temp = allTemps.length ? f.t(avg(allTemps)) : null;
+    const dry = rain < 0.2 ? 'no rain' : 'only light rain';
+    const wish = modes.indexOf('transit') >= 0 && !drive && !exposed ? 'Have a smooth trip.' : 'Have a safe trip.';
+    return {
+      title: 'All set for your ' + A + ' to ' + B + ' trip',
+      body: 'Weather looks good on your way' + (temp ? ': about ' + temp + ', ' + dry : ', ' + dry) + ', no strong wind or fog. ' + wish,
+      ok: true
+    };
+  }
+  return { title: A + ' to ' + B + ' trip', body: issues.slice(0, 2).join(' '), ok: false };
 }
 
 module.exports = { tripAlert };
