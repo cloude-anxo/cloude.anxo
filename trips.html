@@ -200,6 +200,15 @@
       if (t.paused) { div.className += ' off'; var bd = document.createElement('span'); bd.className = 'badge'; bd.textContent = 'Paused'; title.appendChild(bd); }
       var acts = document.createElement('div'); acts.className = 'acts';
       function mk(label, fn) { var b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.onclick = function () { fn(b); }; acts.appendChild(b); }
+      var out = document.createElement('div'); out.className = 'mute'; out.style.marginTop = '6px'; out.hidden = true; info.appendChild(out);
+      mk('Check weather now', function (b) {
+        b.disabled = true; out.hidden = false; out.textContent = 'Checking...';
+        api('checkTrip', { id: t.id }).then(function (r) {
+          out.textContent = !r.alert ? 'Could not read the forecast for this route. Try again in a minute.'
+            : r.alert.ok ? ('You would get: ' + r.alert.body)
+            : ('Heads up: ' + r.alert.body);
+        }).catch(function (e) { out.textContent = 'Could not check: ' + e.message; }).then(function () { b.disabled = false; });
+      });
       mk('Edit', function () { startEdit(t); });
       mk(t.paused ? 'Resume' : 'Pause', function (b) {
         b.disabled = true;
